@@ -79,7 +79,7 @@
     MUTEX.get_or_init(|| Arc::new(Mutex::new(())))
 }
 
-<span class="doccomment">/// Main struct for jailer which holds lots of information
+<span class="doccomment">/// Main struct for jailer which holds information related to jail
 </span><span class="kw">pub struct </span>Jailer {
     _temp_directory: TempDir,
     current_directory: PathBuf,
