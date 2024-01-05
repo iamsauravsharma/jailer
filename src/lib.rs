@@ -18,7 +18,7 @@ fn initialize_or_get_mutex<'a>() -> &'a Arc<Mutex<()>> {
     MUTEX.get_or_init(|| Arc::new(Mutex::new(())))
 }
 
-/// Main struct for jailer which holds lots of information
+/// Main struct for jailer which holds information related to jail
 pub struct Jailer {
     _temp_directory: TempDir,
     current_directory: PathBuf,
