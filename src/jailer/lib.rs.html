@@ -113,6 +113,12 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Crate for creating sandbox environment and do some action within a sandbox
 //! environment
 
@@ -173,6 +179,12 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>directory(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Path {
         <span class="kw-2">&amp;</span><span class="self">self</span>.directory
+    }
+
+    <span class="doccomment">/// Return path of original directory which was used before jailer directory
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>original_directory(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Path {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.original_directory
     }
 
     <span class="doccomment">/// Set environment variable which will not be removed when `Jailer` gets
