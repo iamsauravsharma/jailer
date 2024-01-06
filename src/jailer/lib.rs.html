@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="jailer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (f688dd684 2024-01-04)" data-channel="nightly" data-search-js="search-c17e98913a53b3b7.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="jailer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (595bc6f00 2024-01-05)" data-channel="nightly" data-search-js="search-c17e98913a53b3b7.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../jailer/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -59,12 +59,66 @@
 <a href="#57" id="57">57</a>
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Crate for creating sandbox environment and do some action within a sandbox
 //! environment
 
 </span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::ffi::OsString;
-<span class="kw">use </span>std::path::PathBuf;
+<span class="kw">use </span>std::ffi::{OsStr, OsString};
+<span class="kw">use </span>std::path::{Path, PathBuf};
 <span class="kw">use </span>std::sync::{Arc, OnceLock};
 
 <span class="kw">use </span>parking_lot::lock_api::ArcMutexGuard;
@@ -79,31 +133,85 @@
     MUTEX.get_or_init(|| Arc::new(Mutex::new(())))
 }
 
-<span class="doccomment">/// Main struct for jailer which holds information related to jail
+<span class="doccomment">/// `Jailer` struct which creates jail. `Jailer` struct create temp dir and
+/// change current directory to temp directory. As well as preserve all
+/// environment variable.
+///
+/// When `Jailer` gets dropped than `Jailer` will automatically delete temporary
+/// directory contents as well as revert all environment variables and change
+/// current directory to original directory
 </span><span class="kw">pub struct </span>Jailer {
-    _temp_directory: TempDir,
-    current_directory: PathBuf,
+    temp_directory: <span class="prelude-ty">Option</span>&lt;TempDir&gt;,
+    directory: PathBuf,
+    original_directory: PathBuf,
     envs_vars_os: HashMap&lt;OsString, OsString&gt;,
     _lock: ArcMutexGuard&lt;RawMutex, ()&gt;,
 }
 
 <span class="kw">impl </span>Jailer {
-    <span class="doccomment">/// Create new jailer
+    <span class="doccomment">/// Create new `Jailer`
     ///
     /// # Errors
-    /// if new jailer cannot be created
+    /// if new `Jailer` cannot be created
     </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, std::io::Error&gt; {
         <span class="kw">let </span>lock = initialize_or_get_mutex().lock_arc();
         <span class="kw">let </span>temp_dir = TempDir::new()<span class="question-mark">?</span>;
-        <span class="kw">let </span>current_directory = std::env::current_dir()<span class="question-mark">?</span>;
-        <span class="kw">let </span>vars = std::env::vars_os().collect();
+        <span class="kw">let </span>directory = temp_dir.path().canonicalize()<span class="question-mark">?</span>;
+        <span class="kw">let </span>original_directory = std::env::current_dir()<span class="question-mark">?</span>;
+        <span class="kw">let </span>envs_vars_os = std::env::vars_os().collect();
         std::env::set_current_dir(<span class="kw-2">&amp;</span>temp_dir)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            _temp_directory: temp_dir,
-            current_directory,
-            envs_vars_os: vars,
+            temp_directory: <span class="prelude-val">Some</span>(temp_dir),
+            directory,
+            original_directory,
+            envs_vars_os,
             _lock: lock,
         })
+    }
+
+    <span class="doccomment">/// Returns path of directory for jailer
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>directory(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Path {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.directory
+    }
+
+    <span class="doccomment">/// Set environment variable which will not be removed when `Jailer` gets
+    /// dropped. Returns value which was already present on key if it exists
+    /// otherwise returns `None`
+    </span><span class="kw">pub fn </span>set_env&lt;K, V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: V) -&gt; <span class="prelude-ty">Option</span>&lt;OsString&gt;
+    <span class="kw">where
+        </span>K: AsRef&lt;OsStr&gt;,
+        V: AsRef&lt;OsStr&gt;,
+    {
+        <span class="kw">let </span>old_value = <span class="self">self
+            </span>.envs_vars_os
+            .insert(key.as_ref().to_os_string(), value.as_ref().to_os_string());
+        std::env::set_var(key, value);
+        old_value
+    }
+
+    <span class="doccomment">/// Closes a `Jailer`
+    ///
+    /// Although `Jailer` removes directory and environment variable on drop,
+    /// It may not remove directory or change current directory which can still
+    /// fails and error will be ignored. To detect and handle error due to
+    /// change of directory or deletion of temp dir call close manually
+    ///
+    /// # Errors
+    /// When `Jailer` cannot be closed properly
+    </span><span class="kw">pub fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>jailer = <span class="self">self</span>;
+        <span class="kw">for </span>key <span class="kw">in </span>std::env::vars_os().collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;().keys() {
+            std::env::remove_var(key);
+        }
+        <span class="kw">for </span>(key, value) <span class="kw">in </span><span class="kw-2">&amp;</span>jailer.envs_vars_os {
+            std::env::set_var(key, value);
+        }
+        std::env::set_current_dir(jailer.original_directory.as_path())<span class="question-mark">?</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(temp) = jailer.temp_directory.take() {
+            temp.close()<span class="question-mark">?</span>;
+        };
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -115,7 +223,7 @@
         <span class="kw">for </span>(key, value) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.envs_vars_os {
             std::env::set_var(key, value);
         }
-        std::env::set_current_dir(<span class="self">self</span>.current_directory.as_path()).ok();
+        std::env::set_current_dir(<span class="self">self</span>.original_directory.as_path()).ok();
     }
 }
 </code></pre></div></section></main></body></html>
