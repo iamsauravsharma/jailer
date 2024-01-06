@@ -60,6 +60,12 @@ impl Jailer {
         &self.directory
     }
 
+    /// Return path of original directory which was used before jailer directory
+    #[must_use]
+    pub fn original_directory(&self) -> &Path {
+        &self.original_directory
+    }
+
     /// Set environment variable which will not be removed when `Jailer` gets
     /// dropped. Returns value which was already present on key if it exists
     /// otherwise returns `None`
