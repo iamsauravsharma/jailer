@@ -29,7 +29,8 @@ pub struct Jailer {
     temp_directory: Option<TempDir>,
     directory: PathBuf,
     original_directory: PathBuf,
-    envs_vars_os: HashMap<OsString, OsString>,
+    original_env_vars_os: HashMap<OsString, OsString>,
+    preserved_env_vars_os: HashMap<OsString, OsString>,
     _lock: ArcMutexGuard<RawMutex, ()>,
 }
 
@@ -43,13 +44,14 @@ impl Jailer {
         let temp_dir = TempDir::new()?;
         let directory = temp_dir.path().canonicalize()?;
         let original_directory = std::env::current_dir()?;
-        let envs_vars_os = std::env::vars_os().collect();
+        let original_env_vars_os = std::env::vars_os().collect();
         std::env::set_current_dir(&temp_dir)?;
         Ok(Self {
             temp_directory: Some(temp_dir),
             directory,
             original_directory,
-            envs_vars_os,
+            original_env_vars_os,
+            preserved_env_vars_os: HashMap::new(),
             _lock: lock,
         })
     }
@@ -66,19 +68,55 @@ impl Jailer {
         &self.original_directory
     }
 
-    /// Set environment variable which will not be removed when `Jailer` gets
-    /// dropped. Returns value which was already present on key if it exists
-    /// otherwise returns `None`
-    pub fn set_env<K, V>(&mut self, key: K, value: V) -> Option<OsString>
+    /// Set environment variable which will be saved as preserved env this type
+    /// of env will not be removed when `Jailer` gets dropped.
+    pub fn set_env<K, V>(&mut self, key: K, value: V)
     where
         K: AsRef<OsStr>,
         V: AsRef<OsStr>,
     {
-        let old_value = self
-            .envs_vars_os
+        self.preserved_env_vars_os
             .insert(key.as_ref().to_os_string(), value.as_ref().to_os_string());
         std::env::set_var(key, value);
-        old_value
+    }
+
+    /// Remove environment variable from preserved env
+    ///
+    /// This function do not remove current environment variable. To remove
+    /// current environment variable you need to manually call
+    /// [`std::env::remove_var`].
+    pub fn remove_preserved_env<K>(&mut self, key: K)
+    where
+        K: AsRef<OsStr>,
+    {
+        self.preserved_env_vars_os.remove(key.as_ref());
+    }
+
+    /// Return hashmap of original env variables
+    ///
+    /// If any env is added by using set env than those env are not provided in
+    /// this response use [`Jailer::preserved_env_vars_os`]
+    #[must_use]
+    pub fn original_env_vars_os(&self) -> &HashMap<OsString, OsString> {
+        &self.original_env_vars_os
+    }
+
+    /// Return hashmap of preserved env variables
+    #[must_use]
+    pub fn preserved_env_vars_os(&self) -> &HashMap<OsString, OsString> {
+        &self.preserved_env_vars_os
+    }
+
+    fn revert_env_vars(&self) {
+        for key in std::env::vars_os().collect::<HashMap<_, _>>().keys() {
+            std::env::remove_var(key);
+        }
+        for (key, value) in &self.original_env_vars_os {
+            std::env::set_var(key, value);
+        }
+        for (key, value) in &self.preserved_env_vars_os {
+            std::env::set_var(key, value);
+        }
     }
 
     /// Closes a `Jailer`
@@ -88,16 +126,16 @@ impl Jailer {
     /// fails and error will be ignored. To detect and handle error due to
     /// change of directory or deletion of temp dir call close manually
     ///
+    /// While closing/dropping, At first all current environment variables are
+    /// removed than original env variables gets added at last preserved env
+    /// variables gets added in those order before changing to original
+    /// directory and closing temporary directory at last
+    ///
     /// # Errors
     /// When `Jailer` cannot be closed properly
     pub fn close(self) -> Result<(), std::io::Error> {
         let mut jailer = self;
-        for key in std::env::vars_os().collect::<HashMap<_, _>>().keys() {
-            std::env::remove_var(key);
-        }
-        for (key, value) in &jailer.envs_vars_os {
-            std::env::set_var(key, value);
-        }
+        jailer.revert_env_vars();
         std::env::set_current_dir(jailer.original_directory.as_path())?;
         if let Some(temp) = jailer.temp_directory.take() {
             temp.close()?;
@@ -108,12 +146,7 @@ impl Jailer {
 
 impl Drop for Jailer {
     fn drop(&mut self) {
-        for key in std::env::vars_os().collect::<HashMap<_, _>>().keys() {
-            std::env::remove_var(key);
-        }
-        for (key, value) in &self.envs_vars_os {
-            std::env::set_var(key, value);
-        }
+        self.revert_env_vars();
         std::env::set_current_dir(self.original_directory.as_path()).ok();
     }
 }
