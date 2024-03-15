@@ -152,6 +152,47 @@
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Crate for creating sandbox environment and do some action within a sandbox
 //! environment
 
@@ -193,6 +234,14 @@
     ///
     /// # Errors
     /// if new `Jailer` cannot be created
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let jailer = Jailer::new().unwrap();
+    /// // do some action in jailer
+    /// jailer.close().unwrap();
+    /// ```
     </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, std::io::Error&gt; {
         <span class="kw">let </span>lock = initialize_or_get_mutex().lock_arc();
         <span class="kw">let </span>temp_dir = TempDir::new()<span class="question-mark">?</span>;
@@ -217,6 +266,15 @@
     }
 
     <span class="doccomment">/// Return path of original directory which was used before jailer directory
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let current_directory = std::env::current_dir().unwrap();
+    /// let jailer = Jailer::new().unwrap();
+    /// assert_eq!(jailer.original_directory(), &amp;current_directory);
+    /// jailer.close().unwrap();
+    /// ```
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>original_directory(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Path {
         <span class="kw-2">&amp;</span><span class="self">self</span>.original_directory
@@ -224,6 +282,18 @@
 
     <span class="doccomment">/// Set environment variable which will be saved as preserved env this type
     /// of env will not be removed when `Jailer` gets dropped.
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let mut jailer = Jailer::new().unwrap();
+    /// jailer.set_env("KEY", "VALUE");
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// std::env::set_var("KEY", "ANOTHER_VALUE");
+    /// assert_eq!(std::env::var("KEY"), Ok("ANOTHER_VALUE".to_string()));
+    /// jailer.close().unwrap();
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// ```
     </span><span class="kw">pub fn </span>set_env&lt;K, V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: V)
     <span class="kw">where
         </span>K: AsRef&lt;OsStr&gt;,
@@ -239,6 +309,18 @@
     /// This function do not remove current environment variable. To remove
     /// current environment variable you need to manually call
     /// [`std::env::remove_var`].
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let mut jailer = Jailer::new().unwrap();
+    /// jailer.set_env("KEY", "VALUE");
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// jailer.remove_preserved_env("KEY");
+    /// // value is not removed till now have to be removed manually
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// jailer.close().unwrap();
+    /// assert!(std::env::var("KEY").is_err());
+    /// ```
     </span><span class="kw">pub fn </span>remove_preserved_env&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K)
     <span class="kw">where
         </span>K: AsRef&lt;OsStr&gt;,
