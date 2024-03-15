@@ -39,6 +39,14 @@ impl Jailer {
     ///
     /// # Errors
     /// if new `Jailer` cannot be created
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let jailer = Jailer::new().unwrap();
+    /// // do some action in jailer
+    /// jailer.close().unwrap();
+    /// ```
     pub fn new() -> Result<Self, std::io::Error> {
         let lock = initialize_or_get_mutex().lock_arc();
         let temp_dir = TempDir::new()?;
@@ -63,6 +71,15 @@ impl Jailer {
     }
 
     /// Return path of original directory which was used before jailer directory
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let current_directory = std::env::current_dir().unwrap();
+    /// let jailer = Jailer::new().unwrap();
+    /// assert_eq!(jailer.original_directory(), &current_directory);
+    /// jailer.close().unwrap();
+    /// ```
     #[must_use]
     pub fn original_directory(&self) -> &Path {
         &self.original_directory
@@ -70,6 +87,18 @@ impl Jailer {
 
     /// Set environment variable which will be saved as preserved env this type
     /// of env will not be removed when `Jailer` gets dropped.
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let mut jailer = Jailer::new().unwrap();
+    /// jailer.set_env("KEY", "VALUE");
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// std::env::set_var("KEY", "ANOTHER_VALUE");
+    /// assert_eq!(std::env::var("KEY"), Ok("ANOTHER_VALUE".to_string()));
+    /// jailer.close().unwrap();
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// ```
     pub fn set_env<K, V>(&mut self, key: K, value: V)
     where
         K: AsRef<OsStr>,
@@ -85,6 +114,18 @@ impl Jailer {
     /// This function do not remove current environment variable. To remove
     /// current environment variable you need to manually call
     /// [`std::env::remove_var`].
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let mut jailer = Jailer::new().unwrap();
+    /// jailer.set_env("KEY", "VALUE");
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// jailer.remove_preserved_env("KEY");
+    /// // value is not removed till now have to be removed manually
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// jailer.close().unwrap();
+    /// assert!(std::env::var("KEY").is_err());
+    /// ```
     pub fn remove_preserved_env<K>(&mut self, key: K)
     where
         K: AsRef<OsStr>,
