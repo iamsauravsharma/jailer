@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="jailer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (b6a8c762e 2024-01-06)" data-channel="nightly" data-search-js="search-1cefe72944ee87e6.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/lib.rs`."><title>lib.rs - source</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="jailer" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (f4b771bf1 2024-03-14)" data-channel="nightly" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../jailer/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -119,6 +119,39 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Crate for creating sandbox environment and do some action within a sandbox
 //! environment
 
@@ -150,7 +183,8 @@
     temp_directory: <span class="prelude-ty">Option</span>&lt;TempDir&gt;,
     directory: PathBuf,
     original_directory: PathBuf,
-    envs_vars_os: HashMap&lt;OsString, OsString&gt;,
+    original_env_vars_os: HashMap&lt;OsString, OsString&gt;,
+    preserved_env_vars_os: HashMap&lt;OsString, OsString&gt;,
     _lock: ArcMutexGuard&lt;RawMutex, ()&gt;,
 }
 
@@ -164,13 +198,14 @@
         <span class="kw">let </span>temp_dir = TempDir::new()<span class="question-mark">?</span>;
         <span class="kw">let </span>directory = temp_dir.path().canonicalize()<span class="question-mark">?</span>;
         <span class="kw">let </span>original_directory = std::env::current_dir()<span class="question-mark">?</span>;
-        <span class="kw">let </span>envs_vars_os = std::env::vars_os().collect();
+        <span class="kw">let </span>original_env_vars_os = std::env::vars_os().collect();
         std::env::set_current_dir(<span class="kw-2">&amp;</span>temp_dir)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             temp_directory: <span class="prelude-val">Some</span>(temp_dir),
             directory,
             original_directory,
-            envs_vars_os,
+            original_env_vars_os,
+            preserved_env_vars_os: HashMap::new(),
             _lock: lock,
         })
     }
@@ -187,19 +222,55 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.original_directory
     }
 
-    <span class="doccomment">/// Set environment variable which will not be removed when `Jailer` gets
-    /// dropped. Returns value which was already present on key if it exists
-    /// otherwise returns `None`
-    </span><span class="kw">pub fn </span>set_env&lt;K, V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: V) -&gt; <span class="prelude-ty">Option</span>&lt;OsString&gt;
+    <span class="doccomment">/// Set environment variable which will be saved as preserved env this type
+    /// of env will not be removed when `Jailer` gets dropped.
+    </span><span class="kw">pub fn </span>set_env&lt;K, V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: V)
     <span class="kw">where
         </span>K: AsRef&lt;OsStr&gt;,
         V: AsRef&lt;OsStr&gt;,
     {
-        <span class="kw">let </span>old_value = <span class="self">self
-            </span>.envs_vars_os
+        <span class="self">self</span>.preserved_env_vars_os
             .insert(key.as_ref().to_os_string(), value.as_ref().to_os_string());
         std::env::set_var(key, value);
-        old_value
+    }
+
+    <span class="doccomment">/// Remove environment variable from preserved env
+    ///
+    /// This function do not remove current environment variable. To remove
+    /// current environment variable you need to manually call
+    /// [`std::env::remove_var`].
+    </span><span class="kw">pub fn </span>remove_preserved_env&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K)
+    <span class="kw">where
+        </span>K: AsRef&lt;OsStr&gt;,
+    {
+        <span class="self">self</span>.preserved_env_vars_os.remove(key.as_ref());
+    }
+
+    <span class="doccomment">/// Return hashmap of original env variables
+    ///
+    /// If any env is added by using set env than those env are not provided in
+    /// this response use [`Jailer::preserved_env_vars_os`]
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>original_env_vars_os(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;OsString, OsString&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.original_env_vars_os
+    }
+
+    <span class="doccomment">/// Return hashmap of preserved env variables
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>preserved_env_vars_os(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HashMap&lt;OsString, OsString&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.preserved_env_vars_os
+    }
+
+    <span class="kw">fn </span>revert_env_vars(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">for </span>key <span class="kw">in </span>std::env::vars_os().collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;().keys() {
+            std::env::remove_var(key);
+        }
+        <span class="kw">for </span>(key, value) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.original_env_vars_os {
+            std::env::set_var(key, value);
+        }
+        <span class="kw">for </span>(key, value) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.preserved_env_vars_os {
+            std::env::set_var(key, value);
+        }
     }
 
     <span class="doccomment">/// Closes a `Jailer`
@@ -209,16 +280,16 @@
     /// fails and error will be ignored. To detect and handle error due to
     /// change of directory or deletion of temp dir call close manually
     ///
+    /// While closing/dropping, At first all current environment variables are
+    /// removed than original env variables gets added at last preserved env
+    /// variables gets added in those order before changing to original
+    /// directory and closing temporary directory at last
+    ///
     /// # Errors
     /// When `Jailer` cannot be closed properly
     </span><span class="kw">pub fn </span>close(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>jailer = <span class="self">self</span>;
-        <span class="kw">for </span>key <span class="kw">in </span>std::env::vars_os().collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;().keys() {
-            std::env::remove_var(key);
-        }
-        <span class="kw">for </span>(key, value) <span class="kw">in </span><span class="kw-2">&amp;</span>jailer.envs_vars_os {
-            std::env::set_var(key, value);
-        }
+        jailer.revert_env_vars();
         std::env::set_current_dir(jailer.original_directory.as_path())<span class="question-mark">?</span>;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(temp) = jailer.temp_directory.take() {
             temp.close()<span class="question-mark">?</span>;
@@ -229,12 +300,7 @@
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>Jailer {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">for </span>key <span class="kw">in </span>std::env::vars_os().collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;().keys() {
-            std::env::remove_var(key);
-        }
-        <span class="kw">for </span>(key, value) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.envs_vars_os {
-            std::env::set_var(key, value);
-        }
+        <span class="self">self</span>.revert_env_vars();
         std::env::set_current_dir(<span class="self">self</span>.original_directory.as_path()).ok();
     }
 }
