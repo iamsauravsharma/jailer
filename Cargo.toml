@@ -1,6 +1,6 @@
 [package]
 name = "jailer"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Saurav Sharma <appdroiddeveloper@gmail.com>"]
 homepage = "https://github.com/iamsauravsharma/jailer"
@@ -12,7 +12,7 @@ keywords = ["jailer", "sandbox"]
 
 [dependencies]
 parking_lot = { version = "0.12.1", features = ["arc_lock"] }
-tempfile = "3.9.0"
+tempfile = "3.10.1"
 
 [package.metadata.docs.rs]
 all-features = true
