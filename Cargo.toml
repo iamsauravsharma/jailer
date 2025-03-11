@@ -1,7 +1,7 @@
 [package]
 name = "jailer"
 version = "0.2.0"
-edition = "2021"
+edition = "2024"
 authors = ["Saurav Sharma <appdroiddeveloper@gmail.com>"]
 homepage = "https://github.com/iamsauravsharma/jailer"
 repository = "https://github.com/iamsauravsharma/jailer"
@@ -22,7 +22,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 missing_docs = "warn"
 unreachable_pub = "warn"
 unused_crate_dependencies = "warn"
-unsafe_code = "deny"
 
 [lints.clippy]
 all = "deny"
