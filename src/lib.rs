@@ -37,6 +37,8 @@ impl Jailer {
     /// # Errors
     /// if new [`Jailer`] cannot be created
     ///
+    /// # Example
+    ///
     /// ```rust
     /// use jailer::Jailer;
     ///
@@ -65,6 +67,8 @@ impl Jailer {
     }
 
     /// Return path of original directory which was used before jailer directory
+    ///
+    /// # Example
     ///
     /// ```rust
     /// use jailer::Jailer;
@@ -126,6 +130,8 @@ impl EnvJailer {
     /// # Errors
     /// if new [`EnvJailer`] cannot be created
     ///
+    /// # Example
+    ///
     /// ```rust
     /// use jailer::EnvJailer;
     ///
@@ -148,9 +154,10 @@ impl EnvJailer {
     /// variable. Saving environment variable content when [`Jailer`] gets
     /// dropped
     ///
+    /// # Example
+    ///
     /// ```rust
     /// use jailer::EnvJailer;
-    ///
     /// let mut env_jailer = EnvJailer::new().unwrap();
     /// unsafe {
     ///     std::env::set_var("KEY", "VALUE");
@@ -181,6 +188,9 @@ impl EnvJailer {
     /// This function do not remove current environment variable. To remove
     /// current environment variable you need to manually call
     /// [`std::env::remove_var`].
+    ///
+    /// # Example
+    ///
     /// ```rust
     /// use jailer::EnvJailer;
     ///

@@ -34,17 +34,23 @@ jailer.close().unwrap();
 EnvJailer extends Jailer by also managing environment variables. It ensures that environment changes within the jail do not persist beyond its lifetime.
 ```rust
 use jailer::EnvJailer;
-use std::env;
 
 let mut env_jailer = EnvJailer::new().unwrap();
 unsafe {
-    env_jailer.set_env("TEST_KEY", "sandboxed_value");
+    std::env::set_var("KEY", "VALUE");
+    std::env::set_var("KEY2", "VALUE2");
 }
-assert_eq!(env::var("TEST_KEY").unwrap(), "sandboxed_value");
+env_jailer.set_preserved_env("KEY");
+assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+unsafe {
+    std::env::set_var("KEY", "VALUE2");
+}
+assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
 unsafe {
     env_jailer.close().unwrap();
 }
-assert!(env::var("TEST_KEY").is_err());
+assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
+assert!(std::env::var("KEY2").is_err());
 ```
 
 [license_badge]: https://img.shields.io/github/license/iamsauravsharma/jailer.svg?style=for-the-badge
