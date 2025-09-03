@@ -1,7 +1,7 @@
 //! Crate for creating sandbox environment and do some action within a sandbox
 //! environment
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ffi::{OsStr, OsString};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -81,7 +81,7 @@ impl Jailer {
 
     /// Closes a [`Jailer`]
     ///
-    /// Although [`Jailer`] removes directory,
+    /// Although [`Jailer`] removes directory on drop,
     /// It may not remove directory or change current directory which can still
     /// fails and error will be ignored. To detect and handle error due to
     /// change of directory or deletion of temp dir call close manually
@@ -117,7 +117,7 @@ impl Drop for Jailer {
 pub struct EnvJailer {
     jailer: Jailer,
     original_env_vars_os: HashMap<OsString, OsString>,
-    preserved_env_vars_os: HashMap<OsString, OsString>,
+    preserved_env_vars_os: HashSet<OsString>,
 }
 
 impl EnvJailer {
@@ -140,44 +140,40 @@ impl EnvJailer {
         Ok(Self {
             jailer: Jailer::new()?,
             original_env_vars_os,
-            preserved_env_vars_os: HashMap::new(),
+            preserved_env_vars_os: HashSet::new(),
         })
     }
 
-    /// Set environment variable which will be saved as preserved env this type
-    /// of env will not be removed when [`Jailer`] gets dropped.
-    ///
-    /// # Safety
-    ///  Setting environment variable is not safe operation see
-    /// [`std::env::set_var`]
+    /// Set provided environment variable name as preserved environment
+    /// variable. Saving environment variable content when [`Jailer`] gets
+    /// dropped
     ///
     /// ```rust
     /// use jailer::EnvJailer;
     ///
     /// let mut env_jailer = EnvJailer::new().unwrap();
     /// unsafe {
-    ///     env_jailer.set_env("KEY", "VALUE");
+    ///     std::env::set_var("KEY", "VALUE");
+    ///     std::env::set_var("KEY2", "VALUE2");
     /// }
+    /// env_jailer.set_preserved_env("KEY");
     /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
     /// unsafe {
-    ///     std::env::set_var("KEY", "ANOTHER_VALUE");
+    ///     std::env::set_var("KEY", "VALUE2");
     /// }
-    /// assert_eq!(std::env::var("KEY"), Ok("ANOTHER_VALUE".to_string()));
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
     /// unsafe {
     ///     env_jailer.close().unwrap();
     /// }
-    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
+    /// assert!(std::env::var("KEY2").is_err());
     /// ```
-    pub unsafe fn set_env<K, V>(&mut self, key: K, value: V)
+    pub fn set_preserved_env<K>(&mut self, key: K)
     where
         K: AsRef<OsStr>,
-        V: AsRef<OsStr>,
     {
         self.preserved_env_vars_os
-            .insert(key.as_ref().to_os_string(), value.as_ref().to_os_string());
-        unsafe {
-            std::env::set_var(key, value);
-        }
+            .insert(key.as_ref().to_os_string());
     }
 
     /// Remove environment variable from preserved env
@@ -190,12 +186,11 @@ impl EnvJailer {
     ///
     /// let mut env_jailer = EnvJailer::new().unwrap();
     /// unsafe {
-    ///     env_jailer.set_env("KEY", "VALUE");
+    ///     std::env::set_var("KEY", "VALUE");
     /// }
+    /// env_jailer.set_preserved_env("KEY");
     /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
     /// env_jailer.remove_preserved_env("KEY");
-    /// // value is not removed till now have to be removed manually
-    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
     /// unsafe {
     ///     env_jailer.close().unwrap();
     /// }
@@ -217,24 +212,21 @@ impl EnvJailer {
         &self.original_env_vars_os
     }
 
-    /// Return hashmap of preserved env variables
+    /// Return hash set of preserved env variables
     #[must_use]
-    pub fn preserved_env_vars_os(&self) -> &HashMap<OsString, OsString> {
+    pub fn preserved_env_vars_os(&self) -> &HashSet<OsString> {
         &self.preserved_env_vars_os
     }
 
     unsafe fn revert_env_vars(&self) {
         for key in std::env::vars_os().collect::<HashMap<_, _>>().keys() {
-            unsafe {
-                std::env::remove_var(key);
+            if !self.preserved_env_vars_os.contains(key) {
+                unsafe {
+                    std::env::remove_var(key);
+                }
             }
         }
         for (key, value) in &self.original_env_vars_os {
-            unsafe {
-                std::env::set_var(key, value);
-            }
-        }
-        for (key, value) in &self.preserved_env_vars_os {
             unsafe {
                 std::env::set_var(key, value);
             }
