@@ -61,6 +61,19 @@ impl Jailer {
     }
 
     /// Returns path of directory for jailer
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use jailer::Jailer;
+    ///
+    /// let before_jailer_directory = std::env::current_dir().unwrap();
+    /// let mut jailer = Jailer::new().unwrap();
+    /// assert_ne!(jailer.directory(), &before_jailer_directory);
+    /// assert_ne!(std::env::current_dir().unwrap(), before_jailer_directory);
+    /// jailer.close().unwrap();
+    /// assert_eq!(std::env::current_dir().unwrap(), before_jailer_directory);
+    /// ```
     #[must_use]
     pub fn directory(&self) -> &Path {
         &self.directory
@@ -73,10 +86,12 @@ impl Jailer {
     /// ```rust
     /// use jailer::Jailer;
     ///
-    /// let current_directory = std::env::current_dir().unwrap();
+    /// let before_jailer_directory = std::env::current_dir().unwrap();
     /// let mut jailer = Jailer::new().unwrap();
-    /// assert_eq!(jailer.original_directory(), &current_directory);
+    /// assert_eq!(jailer.original_directory(), &before_jailer_directory);
+    /// assert_ne!(std::env::current_dir().unwrap(), before_jailer_directory);
     /// jailer.close().unwrap();
+    /// assert_eq!(std::env::current_dir().unwrap(), before_jailer_directory);
     /// ```
     #[must_use]
     pub fn original_directory(&self) -> &Path {
