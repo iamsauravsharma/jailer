@@ -1,10 +1,18 @@
-//! Crate for creating sandbox environment and do some action within a sandbox
-//! environment
+//! Crate for creating sandbox environments to perform actions in isolation.
+//!
+//! This crate provides two main types:
+//! - [`Jailer`]: A simple sandbox that changes the current working directory
+//!   into a temporary one. When dropped or closed, it restores the original
+//!   directory and cleans up the temporary space.
+//! - [`EnvJailer`]: Extends [`Jailer`] by also managing environment variables,
+//!   allowing preservation of selected variables while clearing others on exit.
+//!
+//! Both types are thread-safe and ensure only one instance runs at a time via
+//! a global mutex.
 
 use std::collections::{HashMap, HashSet};
 use std::ffi::{OsStr, OsString};
-use std::ops::Deref;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{Arc, OnceLock};
 
 use parking_lot::lock_api::ArcMutexGuard;
@@ -19,102 +27,110 @@ fn initialize_or_get_mutex<'a>() -> &'a Arc<Mutex<()>> {
     MUTEX.get_or_init(|| Arc::new(Mutex::new(())))
 }
 
-/// [`Jailer`] struct which creates jail.
+/// [`Jailer`] struct which creates a jail environment.
 ///
-/// [`Jailer`] struct create temp dir and change current directory to temp
-/// directory. When [`Jailer`] gets dropped than [`Jailer`] will automatically
-/// delete temporary directory contents
+/// [`Jailer`] creates a temporary directory and changes the current working
+/// directory to it. On drop or manual close, it restores the original working
+/// directory and deletes the temporary directory.
+///
+/// It uses a global mutex to ensure only one `Jailer` is active at a time
+/// across threads.
 pub struct Jailer {
     temp_directory: Option<TempDir>,
-    directory: PathBuf,
     original_directory: PathBuf,
     _lock: ArcMutexGuard<RawMutex, ()>,
 }
 
 impl Jailer {
-    /// Create new [`Jailer`]
+    /// Create a new [`Jailer`].
+    ///
+    /// This will:
+    /// - Lock globally to prevent concurrent instances.
+    /// - Create a temporary directory.
+    /// - Change the current directory to that temp dir.
     ///
     /// # Errors
-    /// if new [`Jailer`] cannot be created
+    ///
+    /// Returns an error if:
+    /// - The temporary directory cannot be created.
+    /// - Changing the current directory fails.
     ///
     /// # Example
     ///
     /// ```rust
     /// use jailer::Jailer;
     ///
+    /// // Capture the original working directory
+    /// let original_directory = std::env::current_dir().unwrap();
+    ///
     /// let mut jailer = Jailer::new().unwrap();
-    /// // do some action in jailer
+    ///
+    /// // We're now inside the jail
+    /// let inside_jailer_directory = std::env::current_dir().unwrap();
+    /// assert_ne!(inside_jailer_directory, original_directory);
+    ///
+    /// // Do some action in jailer...
+    ///
+    /// // Close the jail explicitly
     /// jailer.close().unwrap();
+    ///
+    /// // Back to original directory
+    /// let after_jailer_directory = std::env::current_dir().unwrap();
+    /// assert_eq!(after_jailer_directory, original_directory);
+    /// assert_ne!(inside_jailer_directory, after_jailer_directory);
     /// ```
     pub fn new() -> Result<Self, std::io::Error> {
         let lock = initialize_or_get_mutex().lock_arc();
         let temp_dir = TempDir::new()?;
-        let directory = temp_dir.path().canonicalize()?;
         let original_directory = std::env::current_dir()?;
         std::env::set_current_dir(&temp_dir)?;
         Ok(Self {
             temp_directory: Some(temp_dir),
-            directory,
             original_directory,
             _lock: lock,
         })
     }
 
-    /// Returns path of directory for jailer
+    /// Get a reference to the original directory
+    ///
+    /// This returns the directory that was active when the [`Jailer`] was
+    /// created
     ///
     /// # Example
     ///
     /// ```rust
     /// use jailer::Jailer;
     ///
-    /// let before_jailer_directory = std::env::current_dir().unwrap();
-    /// let mut jailer = Jailer::new().unwrap();
-    /// assert_ne!(jailer.directory(), &before_jailer_directory);
-    /// assert_ne!(std::env::current_dir().unwrap(), before_jailer_directory);
+    /// let original_directory = std::env::current_dir().unwrap();
+    /// let jailer = Jailer::new().unwrap();
+    ///
+    /// assert_eq!(jailer.original_directory(), &original_directory);
     /// jailer.close().unwrap();
-    /// assert_eq!(std::env::current_dir().unwrap(), before_jailer_directory);
     /// ```
     #[must_use]
-    pub fn directory(&self) -> &Path {
-        &self.directory
-    }
-
-    /// Return path of original directory which was used before jailer directory
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use jailer::Jailer;
-    ///
-    /// let before_jailer_directory = std::env::current_dir().unwrap();
-    /// let mut jailer = Jailer::new().unwrap();
-    /// assert_eq!(jailer.original_directory(), &before_jailer_directory);
-    /// assert_ne!(std::env::current_dir().unwrap(), before_jailer_directory);
-    /// jailer.close().unwrap();
-    /// assert_eq!(std::env::current_dir().unwrap(), before_jailer_directory);
-    /// ```
-    #[must_use]
-    pub fn original_directory(&self) -> &Path {
+    pub fn original_directory(&self) -> &PathBuf {
         &self.original_directory
     }
 
-    /// Closes a [`Jailer`]
+    /// Closes the [`Jailer`] and performs cleanup.
     ///
-    /// Although [`Jailer`] removes directory on drop,
-    /// It may not remove directory or change current directory which can still
-    /// fails and error will be ignored. To detect and handle error due to
-    /// change of directory or deletion of temp dir call close manually
+    /// This method:
+    /// - Changes back to the original working directory.
+    /// - Deletes the temporary directory.
+    /// - Releases the global lock.
     ///
-    /// While closing/dropping. Current directory is changed to original
-    /// directory and temp dir is closed
+    /// It consumes `self`, so the jailer cannot be used afterward.
     ///
     /// # Errors
-    /// When [`Jailer`] cannot be closed properly
-    pub fn close(&mut self) -> Result<(), std::io::Error> {
+    ///
+    /// Returns an error if changing the directory or deleting the temp dir
+    /// fails.
+    pub fn close(mut self) -> Result<(), std::io::Error> {
         std::env::set_current_dir(self.original_directory.as_path())?;
         if let Some(temp) = self.temp_directory.take() {
             temp.close()?;
         }
+        std::mem::forget(self);
         Ok(())
     }
 }
@@ -128,66 +144,131 @@ impl Drop for Jailer {
     }
 }
 
-/// [`EnvJailer`] struct which creates jail. [`EnvJailer`] is build on top of
-/// [`Jailer`] which also handles environment variable. It is different than
-/// [`Jailer`] since environment variable set and unset operation is unsafe
+/// [`EnvJailer`] struct which creates a jail environment with environment
+/// variable management.
 ///
-/// [`EnvJailer`] reverts to original env variable when it is dropped or closed
+/// [`EnvJailer`] wraps [`Jailer`] and adds support for preserving specific
+/// environment variables. On drop or close, it:
+/// - Removes all environment variables not marked as preserved.
+/// - Restores original values for preserved keys.
+/// - Reverts to the original working directory and cleans up the temp dir.
+///
+/// # Safety
+///
+/// Environment variable manipulation via [`std::env::set_var`] and
+/// [`std::env::remove_var`] is considered unsafe due to potential race
+/// conditions in multi-threaded programs. Therefore, methods like
+/// [`EnvJailer::close`] are marked as `unsafe`.
 pub struct EnvJailer {
-    jailer: Jailer,
+    jailer: Option<Jailer>,
+    original_directory: PathBuf,
     original_env_vars_os: HashMap<OsString, OsString>,
     preserved_env_vars_os: HashSet<OsString>,
 }
 
 impl EnvJailer {
-    /// Create new [`EnvJailer`]
+    /// Create a new [`EnvJailer`].
+    ///
+    /// This captures the current environment variables and working directory,
+    /// then initializes a new [`Jailer`].
     ///
     /// # Errors
-    /// if new [`EnvJailer`] cannot be created
+    ///
+    /// Returns an error if the underlying [`Jailer`] cannot be created.
     ///
     /// # Example
     ///
     /// ```rust
     /// use jailer::EnvJailer;
     ///
+    /// // Capture the original working directory
+    /// let original_directory = std::env::current_dir().unwrap();
+    ///
     /// let mut env_jailer = EnvJailer::new().unwrap();
-    /// // do some action in jailer
+    ///
+    /// // Do some action in jailer...
+    ///
+    /// // Close the jail explicitly (unsafe due to env var changes)
     /// unsafe {
     ///     env_jailer.close().unwrap();
     /// }
+    ///
+    /// // Back to original directory
+    /// assert_eq!(std::env::current_dir().unwrap(), original_directory);
     /// ```
     pub fn new() -> Result<Self, std::io::Error> {
         let original_env_vars_os = std::env::vars_os().collect();
+        let jailer = Jailer::new()?;
+        let original_dir = jailer.original_directory().clone();
+
         Ok(Self {
-            jailer: Jailer::new()?,
+            jailer: Some(jailer),
+            original_directory: original_dir,
             original_env_vars_os,
             preserved_env_vars_os: HashSet::new(),
         })
     }
 
-    /// Set provided environment variable name as preserved environment
-    /// variable. Saving environment variable content when [`Jailer`] gets
-    /// dropped
+    /// Get a reference to the original directory
+    ///
+    /// This returns the directory that was active when the [`EnvJailer`] was
+    /// created
     ///
     /// # Example
     ///
     /// ```rust
     /// use jailer::EnvJailer;
-    /// let mut env_jailer = EnvJailer::new().unwrap();
-    /// unsafe {
-    ///     std::env::set_var("KEY", "VALUE");
-    ///     std::env::set_var("KEY2", "VALUE2");
-    /// }
-    /// env_jailer.set_preserved_env("KEY");
-    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
-    /// unsafe {
-    ///     std::env::set_var("KEY", "VALUE2");
-    /// }
-    /// assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
+    ///
+    /// let original_directory = std::env::current_dir().unwrap();
+    /// let env_jailer = EnvJailer::new().unwrap();
+    /// assert_eq!(env_jailer.original_directory(), &original_directory);
     /// unsafe {
     ///     env_jailer.close().unwrap();
     /// }
+    /// ```
+    #[must_use]
+    pub fn original_directory(&self) -> &PathBuf {
+        &self.original_directory
+    }
+
+    /// Mark an environment variable as preserved.
+    ///
+    /// When the jailer is closed or dropped, this key will retain its current
+    /// value instead of being removed or reset to the original value.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use jailer::EnvJailer;
+    ///
+    /// unsafe {
+    ///     std::env::set_var("KEY", "VALUE");
+    ///     std::env::set_var("ANOTHER_KEY", "VALUE");
+    /// }
+    ///
+    /// let mut env_jailer = EnvJailer::new().unwrap();
+    ///
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
+    ///
+    /// unsafe {
+    ///     std::env::set_var("KEY2", "VALUE2");
+    /// }
+    /// env_jailer.set_preserved_env("KEY");
+    ///
+    /// unsafe {
+    ///     std::env::set_var("KEY", "VALUE2");
+    ///     std::env::set_var("ANOTHER_KEY", "ANOTHER_VAL");
+    /// }
+    ///
     /// assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
+    /// assert_eq!(std::env::var("ANOTHER_KEY"), Ok("ANOTHER_VAL".to_string()));
+    ///
+    /// unsafe {
+    ///     env_jailer.close().unwrap();
+    /// }
+    ///
+    /// assert_eq!(std::env::var("KEY"), Ok("VALUE2".to_string()));
+    /// assert_eq!(std::env::var("ANOTHER_KEY"), Ok("VALUE".to_string()));
     /// assert!(std::env::var("KEY2").is_err());
     /// ```
     pub fn set_preserved_env<K>(&mut self, key: K)
@@ -198,11 +279,10 @@ impl EnvJailer {
             .insert(key.as_ref().to_os_string());
     }
 
-    /// Remove environment variable from preserved env
+    /// Remove an environment variable from the preserved list.
     ///
-    /// This function do not remove current environment variable. To remove
-    /// current environment variable you need to manually call
-    /// [`std::env::remove_var`].
+    /// Note: This does *not* remove the current environment variable.
+    /// To remove it, call [`std::env::remove_var`] manually.
     ///
     /// # Example
     ///
@@ -210,15 +290,19 @@ impl EnvJailer {
     /// use jailer::EnvJailer;
     ///
     /// let mut env_jailer = EnvJailer::new().unwrap();
+    ///
     /// unsafe {
     ///     std::env::set_var("KEY", "VALUE");
     /// }
+    ///
     /// env_jailer.set_preserved_env("KEY");
     /// assert_eq!(std::env::var("KEY"), Ok("VALUE".to_string()));
     /// env_jailer.remove_preserved_env("KEY");
+    ///
     /// unsafe {
     ///     env_jailer.close().unwrap();
     /// }
+    ///
     /// assert!(std::env::var("KEY").is_err());
     /// ```
     pub fn remove_preserved_env<K>(&mut self, key: K)
@@ -228,16 +312,17 @@ impl EnvJailer {
         self.preserved_env_vars_os.remove(key.as_ref());
     }
 
-    /// Return hashmap of original env variables
+    /// Returns a reference to the map of original environment variables.
     ///
-    /// If any env is added by using set env than those env are not provided in
-    /// this response use [`EnvJailer::preserved_env_vars_os`]
+    /// These are the environment variables present when the [`EnvJailer`] was
+    /// created. Any variables added during the session are not included
+    /// here.
     #[must_use]
     pub fn original_env_vars_os(&self) -> &HashMap<OsString, OsString> {
         &self.original_env_vars_os
     }
 
-    /// Return hash set of preserved env variables
+    /// Returns a reference to the set of preserved environment variable names.
     #[must_use]
     pub fn preserved_env_vars_os(&self) -> &HashSet<OsString> {
         &self.preserved_env_vars_os
@@ -252,44 +337,41 @@ impl EnvJailer {
             }
         }
         for (key, value) in &self.original_env_vars_os {
-            unsafe {
-                std::env::set_var(key, value);
+            if !self.preserved_env_vars_os.contains(key) {
+                unsafe {
+                    std::env::set_var(key, value);
+                }
             }
         }
     }
 
-    /// Closes a [`EnvJailer`]
+    /// Closes the [`EnvJailer`] and performs cleanup.
     ///
-    /// Although [`EnvJailer`] removes directory and environment variable on
-    /// drop, It may not remove directory or change current directory which
-    /// can still fails and error will be ignored. To detect and handle
-    /// error due to change of directory or deletion of temp dir call close
-    /// manually
+    /// This method:
+    /// - Reverts environment variables to their original state (except
+    ///   preserved ones).
+    /// - Closes the underlying [`Jailer`] (restoring directory and removing
+    ///   temp dir).
     ///
-    /// While closing/dropping, At first all current environment variables are
-    /// removed than original env variables gets added at last preserved env
-    /// variables gets added in those order before changing to original
-    /// directory and closing temporary directory at last
+    /// It consumes `self`, so the jailer cannot be used afterward.
     ///
     /// # Errors
-    /// When [`EnvJailer`] cannot be closed properly
     ///
+    /// Returns an error if the underlying [`Jailer::close`] fails.
     ///
     /// # Safety
-    ///  Close function calls [`std::env::remove_var`] and [`std::env::set_var`]
-    /// function which are both unsafe operation
-    pub unsafe fn close(&mut self) -> Result<(), std::io::Error> {
-        unsafe { self.revert_env_vars() };
-        self.jailer.close()?;
+    ///
+    /// This function calls [`std::env::remove_var`] and [`std::env::set_var`],
+    /// which are unsafe due to possible data races in concurrent contexts.
+    pub unsafe fn close(mut self) -> Result<(), std::io::Error> {
+        unsafe {
+            self.revert_env_vars();
+        }
+        if let Some(jailer) = self.jailer.take() {
+            jailer.close()?;
+        }
+        std::mem::forget(self);
         Ok(())
-    }
-}
-
-impl Deref for EnvJailer {
-    type Target = Jailer;
-
-    fn deref(&self) -> &Self::Target {
-        &self.jailer
     }
 }
 
