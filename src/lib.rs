@@ -39,6 +39,7 @@ pub struct Jailer {
     temp_directory: Option<TempDir>,
     original_directory: PathBuf,
     _lock: ArcMutexGuard<RawMutex, ()>,
+    is_closed: bool,
 }
 
 impl Jailer {
@@ -88,6 +89,7 @@ impl Jailer {
             temp_directory: Some(temp_dir),
             original_directory,
             _lock: lock,
+            is_closed: false,
         })
     }
 
@@ -130,16 +132,18 @@ impl Jailer {
         if let Some(temp) = self.temp_directory.take() {
             temp.close()?;
         }
-        std::mem::forget(self);
+        self.is_closed = true;
         Ok(())
     }
 }
 
 impl Drop for Jailer {
     fn drop(&mut self) {
-        std::env::set_current_dir(self.original_directory.as_path()).ok();
-        if let Some(temp) = self.temp_directory.take() {
-            temp.close().ok();
+        if !self.is_closed {
+            std::env::set_current_dir(self.original_directory.as_path()).ok();
+            if let Some(temp) = self.temp_directory.take() {
+                temp.close().ok();
+            }
         }
     }
 }
@@ -370,15 +374,16 @@ impl EnvJailer {
         if let Some(jailer) = self.jailer.take() {
             jailer.close()?;
         }
-        std::mem::forget(self);
         Ok(())
     }
 }
 
 impl Drop for EnvJailer {
     fn drop(&mut self) {
-        unsafe {
-            self.revert_env_vars();
+        if self.jailer.is_some() {
+            unsafe {
+                self.revert_env_vars();
+            }
         }
     }
 }

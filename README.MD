@@ -23,7 +23,7 @@ jailer = "0.4.0"
 Jailer allows you to create a temporary directory where all operations occur. Once the jailer instance is dropped or closed, the directory and its contents are automatically deleted.
 
 ```rust
-let mut jailer = jailer::Jailer::new().unwrap();
+let jailer = jailer::Jailer::new().unwrap();
 // use rust code as required
 // Data is deleted when jailer is dropped or when it is closed
 jailer.close().unwrap();
