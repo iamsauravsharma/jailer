@@ -15,7 +15,7 @@ Edit Cargo.toml file to add jailer as dependencies
 
 ```toml
 [dependencies]
-jailer = "0.4.0"
+jailer = "0.4.1"
 ```
 
 # Usage
