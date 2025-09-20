@@ -1,15 +1,9 @@
 # Set environment variable of rust backtrace to full
 export RUST_BACKTRACE:= "full"
 
-set shell := ["bash", "-uc"]
-
 # List all available recipes
 list:
   just --list --justfile {{justfile()}}
-
-# Clean target directory
-clean:
-    cargo clean
 
 # Run cargo build
 build *args="--all-features":
@@ -18,21 +12,17 @@ build *args="--all-features":
 # Check whether rust code is properly formatted or not (nightly only)
 fmt:
     #!/usr/bin/env bash
+    set -x
     if [[ "$(rustc --version)" == *nightly* ]]; then
-        echo "Running formatter"
         cargo fmt -- --check
-    else
-        echo "Skipping running format for non nightly version"
     fi
 
 # Run clippy to catch common mistakes and improve code (nightly only)
 clippy *args="--all-features":
     #!/usr/bin/env bash
+    set -x
     if [[ "$(rustc --version)" == *nightly* ]]; then
-        echo "Running clippy"
         cargo clippy --workspace {{args}} -- -D warnings
-    else
-        echo "Skipping running clippy for non nightly version"
     fi
 
 # Run tests
@@ -47,8 +37,5 @@ doc *args="--all-features":
 rustdoc:
     cargo rustdoc --all-features -- --cfg docsrs
 
-# Local development tasks i.e fmt, build, clippy, doc and test
-local: fmt build clippy doc test
-
-# Full build including clean
-full: clean local
+# Run all task
+all: fmt build clippy doc test
