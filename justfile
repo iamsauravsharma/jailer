@@ -3,7 +3,7 @@ export RUST_BACKTRACE:= "full"
 
 set shell := ["bash", "-uc"]
 
-# Default recipe which list all available recipes
+# List all available recipes
 list:
   just --list --justfile {{justfile()}}
 
@@ -17,14 +17,18 @@ build *args="--all-features":
 
 # Check whether rust code is properly formatted or not (nightly only)
 fmt:
-    if [[ "$(rustc --version)" == *nightly* ]]; then \
-        cargo fmt -- --check; \
+    #!/usr/bin/env bash
+    set -x
+    if [[ "$(rustc --version)" == *nightly* ]]; then
+        cargo fmt -- --check
     fi
 
 # Run clippy to catch common mistakes and improve code (nightly only)
 clippy *args="--all-features":
-    if [[ "$(rustc --version)" == *nightly* ]]; then \
-        cargo clippy --workspace {{args}} -- -D warnings; \
+    #!/usr/bin/env bash
+    set -x
+    if [[ "$(rustc --version)" == *nightly* ]]; then
+        cargo clippy --workspace {{args}} -- -D warnings;
     fi
 
 # Run tests
