@@ -18,17 +18,21 @@ build *args="--all-features":
 # Check whether rust code is properly formatted or not (nightly only)
 fmt:
     #!/usr/bin/env bash
-    set -x
     if [[ "$(rustc --version)" == *nightly* ]]; then
+        echo "Running formatter"
         cargo fmt -- --check
+    else
+        echo "Skipping running format for non nightly version"
     fi
 
 # Run clippy to catch common mistakes and improve code (nightly only)
 clippy *args="--all-features":
     #!/usr/bin/env bash
-    set -x
     if [[ "$(rustc --version)" == *nightly* ]]; then
-        cargo clippy --workspace {{args}} -- -D warnings;
+        echo "Running clippy"
+        cargo clippy --workspace {{args}} -- -D warnings
+    else
+        echo "Skipping running clippy for non nightly version"
     fi
 
 # Run tests
