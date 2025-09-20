@@ -387,3 +387,71 @@ impl Drop for EnvJailer {
         }
     }
 }
+
+/// Run a closure inside a [`Jailer`] environment.
+///
+/// This function creates a [`Jailer`], runs the provided closure, and ensures
+/// the jail is closed afterward.
+///
+/// # Errors
+///
+/// Returns any error from creating or closing the [`Jailer`], or from the
+/// closure itself.
+///
+/// # Example
+///
+/// ```rust
+/// use jailer::with_jailer;
+///
+/// with_jailer(|_jailer| {
+///     // Do something in the jailed directory
+///     Ok(())
+/// })
+/// .unwrap();
+/// ```
+pub fn with_jailer<F>(f: F) -> Result<(), Box<dyn std::error::Error>>
+where
+    F: FnOnce(&Jailer) -> Result<(), Box<dyn std::error::Error>>,
+{
+    let jailer = Jailer::new()?;
+    let result = f(&jailer);
+    jailer.close()?;
+    result
+}
+
+/// Run a closure inside a [`EnvJailer`] environment.
+///
+/// This function creates a [`EnvJailer`], runs the provided closure, and
+/// ensures the jail is closed afterward.
+///
+/// # Errors
+///
+/// Returns any error from creating or closing the [`EnvJailer`], or from the
+/// closure itself.
+///
+/// # Example
+///
+/// ```rust
+/// use jailer::with_env_jailer;
+/// unsafe {
+///     with_env_jailer(|_env_jailer| {
+///         // Do something in the jailed directory
+///         Ok(())
+///     })
+///     .unwrap();
+/// }
+/// ```
+///
+/// # Safety
+///
+/// This function calls [`std::env::remove_var`] and [`std::env::set_var`],
+/// which are unsafe due to possible data races in concurrent contexts.
+pub unsafe fn with_env_jailer<F>(f: F) -> Result<(), Box<dyn std::error::Error>>
+where
+    F: FnOnce(&Jailer) -> Result<(), Box<dyn std::error::Error>>,
+{
+    let jailer = Jailer::new()?;
+    let result = f(&jailer);
+    jailer.close()?;
+    result
+}
