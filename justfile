@@ -18,6 +18,7 @@ build *args="--all-features":
 fmt:
     #!/usr/bin/env bash
     if [[ "$(rustc --version)" == *nightly* ]]; then
+        echo "Checking if rust is properly formatted"
         cargo fmt -- --check
     fi
 
@@ -25,6 +26,7 @@ fmt:
 clippy *args="--all-features":
     #!/usr/bin/env bash
     if [[ "$(rustc --version)" == *nightly* ]]; then
+        echo "Checking common mistakes in code"
         cargo clippy --workspace {{args}} -- -D warnings
     fi
 

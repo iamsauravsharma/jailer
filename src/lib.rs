@@ -409,12 +409,48 @@ impl Drop for EnvJailer {
 /// })
 /// .unwrap();
 /// ```
-pub fn with_jailer<F>(f: F) -> Result<(), Box<dyn std::error::Error>>
+pub fn with_jailer<F, T>(f: F) -> Result<T, Box<dyn std::error::Error>>
 where
-    F: FnOnce(&Jailer) -> Result<(), Box<dyn std::error::Error>>,
+    F: FnOnce(&Jailer) -> Result<T, Box<dyn std::error::Error>>,
 {
     let jailer = Jailer::new()?;
     let result = f(&jailer);
+    jailer.close()?;
+    result
+}
+
+/// Run a closure inside a [`Jailer`] environment asynchronously.
+///
+/// This function creates a [`Jailer`], runs the provided async closure, and
+/// ensures the jail is closed afterward.
+///
+/// # Errors
+///
+/// Returns any error from creating or closing the [`Jailer`], or from the
+/// closure itself.
+///
+/// # Example
+///
+/// ```rust
+/// use jailer::with_jailer_async;
+/// # tokio_test::block_on(async {
+/// with_jailer_async(|_jailer| {
+///     async {
+///         // Do something in the jailed directory
+///         Ok(())
+///     }
+/// })
+/// .await
+/// .unwrap();
+/// # })
+/// ```
+pub async fn with_jailer_async<F, T, Fut>(f: F) -> Result<T, Box<dyn std::error::Error>>
+where
+    F: FnOnce(&Jailer) -> Fut,
+    Fut: Future<Output = Result<T, Box<dyn std::error::Error>>>,
+{
+    let jailer = Jailer::new()?;
+    let result = f(&jailer).await;
     jailer.close()?;
     result
 }
@@ -446,12 +482,55 @@ where
 ///
 /// This function calls [`std::env::remove_var`] and [`std::env::set_var`],
 /// which are unsafe due to possible data races in concurrent contexts.
-pub unsafe fn with_env_jailer<F>(f: F) -> Result<(), Box<dyn std::error::Error>>
+pub unsafe fn with_env_jailer<F, T>(f: F) -> Result<T, Box<dyn std::error::Error>>
 where
-    F: FnOnce(&Jailer) -> Result<(), Box<dyn std::error::Error>>,
+    F: FnOnce(&Jailer) -> Result<T, Box<dyn std::error::Error>>,
 {
     let jailer = Jailer::new()?;
     let result = f(&jailer);
+    jailer.close()?;
+    result
+}
+
+/// Run a closure inside a [`EnvJailer`] environment asynchronously.
+///
+/// This function creates a [`EnvJailer`], runs the provided async closure, and
+/// ensures the jail is closed afterward.
+///
+/// # Errors
+///
+/// Returns any error from creating or closing the [`EnvJailer`], or from the
+/// closure itself.
+///
+/// # Example
+///
+/// ```rust
+/// use jailer::with_env_jailer_async;
+/// # tokio_test::block_on(async {
+/// unsafe {
+///     with_env_jailer_async(|_env_jailer| {
+///         async {
+///             // Do something in the jailed directory
+///             Ok(())
+///         }
+///     })
+///     .await
+///     .unwrap();
+/// }
+/// # })
+/// ```
+///
+/// # Safety
+///
+/// This function calls [`std::env::remove_var`] and [`std::env::set_var`],
+/// which are unsafe due to possible data races in concurrent contexts.
+pub async unsafe fn with_env_jailer_async<F, Fut, T>(f: F) -> Result<T, Box<dyn std::error::Error>>
+where
+    F: FnOnce(&Jailer) -> Fut,
+    Fut: Future<Output = Result<T, Box<dyn std::error::Error>>>,
+{
+    let jailer = Jailer::new()?;
+    let result = f(&jailer).await;
     jailer.close()?;
     result
 }

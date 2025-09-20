@@ -14,6 +14,9 @@ keywords = ["jailer", "sandbox"]
 parking_lot = { version = "0.12.1", features = ["arc_lock"] }
 tempfile = "3.10.1"
 
+[dev-dependencies]
+tokio-test = "0.4.4"
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
