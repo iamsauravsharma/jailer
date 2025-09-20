@@ -36,6 +36,6 @@ jobs:
           components: rustfmt, clippy
       - name: Install just
         uses: extractions/setup-just@v3
-      - name: Run just full
+      - name: Run all tasks
         run: |
-          just full
+          just all
