@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["with_env_jailer","with_jailer"],"struct":["EnvJailer","Jailer"]};
+window.SIDEBAR_ITEMS = {"fn":["with_env_jailer","with_env_jailer_async","with_jailer","with_jailer_async"],"struct":["EnvJailer","Jailer"]};
