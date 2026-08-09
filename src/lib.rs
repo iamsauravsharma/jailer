@@ -13,19 +13,16 @@
 use std::collections::{HashMap, HashSet};
 use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, LazyLock};
 
 use parking_lot::lock_api::ArcMutexGuard;
 use parking_lot::{Mutex, RawMutex};
 use tempfile::TempDir;
+#[cfg(test)]
+use tokio_test as _;
 
-/// Static mutex which is wrapped around once lock to be thread safe
-static MUTEX: OnceLock<Arc<Mutex<()>>> = OnceLock::new();
-
-/// Initialize or get mutex
-fn initialize_or_get_mutex<'a>() -> &'a Arc<Mutex<()>> {
-    MUTEX.get_or_init(|| Arc::new(Mutex::new(())))
-}
+/// Global mutex which serializes jailer instances across threads
+static MUTEX: LazyLock<Arc<Mutex<()>>> = LazyLock::new(|| Arc::new(Mutex::new(())));
 
 /// [`Jailer`] struct which creates a jail environment.
 ///
@@ -56,6 +53,12 @@ impl Jailer {
     /// - The temporary directory cannot be created.
     /// - Changing the current directory fails.
     ///
+    /// # Deadlock
+    ///
+    /// Creating a second jailer while another one is still alive on the same
+    /// thread will deadlock, since the global mutex is not reentrant. Close
+    /// or drop the first jailer before creating a new one.
+    ///
     /// # Example
     ///
     /// ```rust
@@ -81,7 +84,7 @@ impl Jailer {
     /// assert_ne!(inside_jailer_directory, after_jailer_directory);
     /// ```
     pub fn new() -> Result<Self, std::io::Error> {
-        let lock = initialize_or_get_mutex().lock_arc();
+        let lock = MUTEX.lock_arc();
         let temp_dir = TempDir::new()?;
         let original_directory = std::env::current_dir()?;
         std::env::set_current_dir(&temp_dir)?;
@@ -201,8 +204,10 @@ impl EnvJailer {
     /// assert_eq!(std::env::current_dir().unwrap(), original_directory);
     /// ```
     pub fn new() -> Result<Self, std::io::Error> {
-        let original_env_vars_os = std::env::vars_os().collect();
+        // create jailer first so global lock is held while capturing env vars and
+        // original dir
         let jailer = Jailer::new()?;
+        let original_env_vars_os = std::env::vars_os().collect();
         let original_dir = jailer.original_directory().clone();
 
         Ok(Self {
@@ -333,8 +338,9 @@ impl EnvJailer {
     }
 
     unsafe fn revert_env_vars(&self) {
-        for key in std::env::vars_os().collect::<HashMap<_, _>>().keys() {
-            if !self.preserved_env_vars_os.contains(key) {
+        let current_keys: Vec<OsString> = std::env::vars_os().map(|(key, _)| key).collect();
+        for key in current_keys {
+            if !self.preserved_env_vars_os.contains(&key) {
                 unsafe {
                     std::env::remove_var(key);
                 }
@@ -470,12 +476,17 @@ where
 /// ```rust
 /// use jailer::with_env_jailer;
 /// unsafe {
-///     with_env_jailer(|_env_jailer| {
+///     with_env_jailer(|env_jailer| {
 ///         // Do something in the jailed directory
+///         std::env::set_var("JAILED_ONLY_KEY", "VALUE");
+///         env_jailer.set_preserved_env("SOME_KEY");
 ///         Ok(())
 ///     })
 ///     .unwrap();
 /// }
+///
+/// // Variables set inside the jail are reverted on close
+/// assert!(std::env::var("JAILED_ONLY_KEY").is_err());
 /// ```
 ///
 /// # Safety
@@ -484,11 +495,13 @@ where
 /// which are unsafe due to possible data races in concurrent contexts.
 pub unsafe fn with_env_jailer<F, T>(f: F) -> Result<T, Box<dyn std::error::Error>>
 where
-    F: FnOnce(&Jailer) -> Result<T, Box<dyn std::error::Error>>,
+    F: FnOnce(&mut EnvJailer) -> Result<T, Box<dyn std::error::Error>>,
 {
-    let jailer = Jailer::new()?;
-    let result = f(&jailer);
-    jailer.close()?;
+    let mut env_jailer = EnvJailer::new()?;
+    let result = f(&mut env_jailer);
+    unsafe {
+        env_jailer.close()?;
+    }
     result
 }
 
@@ -508,15 +521,17 @@ where
 /// use jailer::with_env_jailer_async;
 /// # tokio_test::block_on(async {
 /// unsafe {
-///     with_env_jailer_async(|_env_jailer| {
-///         async {
-///             // Do something in the jailed directory
-///             Ok(())
-///         }
+///     with_env_jailer_async(|env_jailer| {
+///         // Do something in the jailed directory
+///         std::env::set_var("JAILED_ONLY_ASYNC_KEY", "VALUE");
+///         async { Ok(()) }
 ///     })
 ///     .await
 ///     .unwrap();
 /// }
+///
+/// // Variables set inside the jail are reverted on close
+/// assert!(std::env::var("JAILED_ONLY_ASYNC_KEY").is_err());
 /// # })
 /// ```
 ///
@@ -526,11 +541,13 @@ where
 /// which are unsafe due to possible data races in concurrent contexts.
 pub async unsafe fn with_env_jailer_async<F, Fut, T>(f: F) -> Result<T, Box<dyn std::error::Error>>
 where
-    F: FnOnce(&Jailer) -> Fut,
+    F: FnOnce(&mut EnvJailer) -> Fut,
     Fut: Future<Output = Result<T, Box<dyn std::error::Error>>>,
 {
-    let jailer = Jailer::new()?;
-    let result = f(&jailer).await;
-    jailer.close()?;
+    let mut env_jailer = EnvJailer::new()?;
+    let result = f(&mut env_jailer).await;
+    unsafe {
+        env_jailer.close()?;
+    }
     result
 }
