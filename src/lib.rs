@@ -204,8 +204,8 @@ impl EnvJailer {
     /// assert_eq!(std::env::current_dir().unwrap(), original_directory);
     /// ```
     pub fn new() -> Result<Self, std::io::Error> {
-        // create jailer first so global lock is held while capturing env vars and
-        // original dir
+        // create jailer first so global lock is held while capturing env vars
+        // and original dir
         let jailer = Jailer::new()?;
         let original_env_vars_os = std::env::vars_os().collect();
         let original_dir = jailer.original_directory().clone();
