@@ -204,8 +204,8 @@
 <a href=#204 id=204 data-nosnippet>204</a>    /// assert_eq!(std::env::current_dir().unwrap(), original_directory);
 <a href=#205 id=205 data-nosnippet>205</a>    /// ```
 <a href=#206 id=206 data-nosnippet>206</a>    </span><span class="kw">pub fn </span>new() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, std::io::Error&gt; {
-<a href=#207 id=207 data-nosnippet>207</a>        <span class="comment">// create jailer first so global lock is held while capturing env vars and
-<a href=#208 id=208 data-nosnippet>208</a>        // original dir
+<a href=#207 id=207 data-nosnippet>207</a>        <span class="comment">// create jailer first so global lock is held while capturing env vars
+<a href=#208 id=208 data-nosnippet>208</a>        // and original dir
 <a href=#209 id=209 data-nosnippet>209</a>        </span><span class="kw">let </span>jailer = Jailer::new()<span class="question-mark">?</span>;
 <a href=#210 id=210 data-nosnippet>210</a>        <span class="kw">let </span>original_env_vars_os = std::env::vars_os().collect();
 <a href=#211 id=211 data-nosnippet>211</a>        <span class="kw">let </span>original_dir = jailer.original_directory().clone();
